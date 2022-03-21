@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "vetology.url.base",
+      "type": "java.lang.String",
+      "description": "Description for vetology.url.base."
+  }
+] }

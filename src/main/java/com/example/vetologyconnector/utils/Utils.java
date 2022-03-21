@@ -1,7 +1,7 @@
-package com.example.vetologyconnector.service;
+package com.example.vetologyconnector.utils;
 
 import com.example.vetologyconnector.exception.VetologyConnectException;
-import com.example.vetologyconnector.model.AnalysisResponseCode;
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -32,7 +32,7 @@ public class Utils {
 
   public static File toFileFromMultipartFile(MultipartFile multipartFile){
 
-    File file = new File(UUID.randomUUID().toString()+ "_" + multipartFile.getOriginalFilename());
+    File file = new File(UUID.randomUUID()+ "_" + multipartFile.getOriginalFilename());
     Path savePath = Paths.get(file.getName());
     try {
       multipartFile.transferTo(savePath);

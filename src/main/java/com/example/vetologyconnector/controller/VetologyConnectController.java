@@ -2,10 +2,11 @@ package com.example.vetologyconnector.controller;
 
 import com.example.vetologyconnector.model.AnalysisRequest;
 import com.example.vetologyconnector.model.AnalysisResponse;
-import com.example.vetologyconnector.model.AnalysisResponseCode;
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.service.VetologyConnectService;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,27 +31,22 @@ public class VetologyConnectController {
       @RequestParam(value="dicomFile5", required = false) MultipartFile dicomFile5,
       @Validated AnalysisRequest request, BindingResult bindingResult){
 
-    request.addIfExists.accept(dicomFile1,request.getDicomFileList());
-    request.addIfExists.accept(dicomFile2,request.getDicomFileList());
-    request.addIfExists.accept(dicomFile3,request.getDicomFileList());
-    request.addIfExists.accept(dicomFile4,request.getDicomFileList());
-    request.addIfExists.accept(dicomFile5,request.getDicomFileList());
-    request.initDicomFileList();
 
     if(bindingResult.hasErrors()){
-      AnalysisResponse response = AnalysisResponse.builder()
+      return  AnalysisResponse.builder()
           .status(400)
-          .message(bindingResult.getAllErrors().stream().map(e->e.getDefaultMessage()).collect(Collectors.toList()).toString())
+          .message(bindingResult.getAllErrors().stream().map(
+              DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList()).toString())
           .build();
-      return response;
     }
 
+    request.initDicomFileList(dicomFile1, dicomFile2, dicomFile3, dicomFile4, dicomFile5);
     vetologyConnectService.sendAnalysisRequestToVetology(request);
-    AnalysisResponse response = AnalysisResponse.builder()
+
+    return AnalysisResponse.builder()
         .status(200)
         .message(AnalysisResponseCode.OK.getMessage())
         .build();
-    return response;
   }
 
 }

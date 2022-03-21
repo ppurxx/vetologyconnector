@@ -1,5 +1,6 @@
 package com.example.vetologyconnector.model;
 
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.exception.VetologyConnectException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

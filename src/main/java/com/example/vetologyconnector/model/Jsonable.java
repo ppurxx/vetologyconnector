@@ -1,6 +1,6 @@
 package com.example.vetologyconnector.model;
 
-import com.example.vetologyconnector.service.Utils;
+import com.example.vetologyconnector.utils.Utils;
 
 public interface Jsonable {
   default String toJson(){

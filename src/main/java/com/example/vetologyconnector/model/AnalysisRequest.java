@@ -1,7 +1,8 @@
 package com.example.vetologyconnector.model;
 
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.exception.VetologyConnectException;
-import com.example.vetologyconnector.service.Utils;
+import com.example.vetologyconnector.utils.Utils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
@@ -68,7 +69,13 @@ public class AnalysisRequest implements Jsonable{
 
   }
 
-  public void initDicomFileList(){
+  public void initDicomFileList(MultipartFile dicomFile1, MultipartFile dicomFile2, MultipartFile dicomFile3, MultipartFile dicomFile4, MultipartFile dicomFile5){
+    addIfExists.accept(dicomFile1,getDicomFileList());
+    addIfExists.accept(dicomFile2,getDicomFileList());
+    addIfExists.accept(dicomFile3,getDicomFileList());
+    addIfExists.accept(dicomFile4,getDicomFileList());
+    addIfExists.accept(dicomFile5,getDicomFileList());
+
     for (File file : this.dicomFileList) {
       try {
         file.createNewFile();

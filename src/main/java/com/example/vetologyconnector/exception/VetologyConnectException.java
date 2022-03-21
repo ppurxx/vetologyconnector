@@ -1,6 +1,6 @@
 package com.example.vetologyconnector.exception;
 
-import com.example.vetologyconnector.model.AnalysisResponseCode;
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 
 public class VetologyConnectException extends RuntimeException{
   AnalysisResponseCode responseCode;

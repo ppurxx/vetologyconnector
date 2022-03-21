@@ -1,4 +1,4 @@
-package com.example.vetologyconnector.model;
+package com.example.vetologyconnector.enums;
 
 import org.springframework.http.HttpStatus;
 

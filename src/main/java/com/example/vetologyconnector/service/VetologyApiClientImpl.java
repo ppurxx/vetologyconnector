@@ -2,10 +2,11 @@ package com.example.vetologyconnector.service;
 
 
 import com.example.vetologyconnector.exception.VetologyConnectException;
-import com.example.vetologyconnector.model.AnalysisResponseCode;
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.model.ContactInfoRequest;
 import com.example.vetologyconnector.model.DicomChunkFileInfoRequest;
 import com.example.vetologyconnector.model.DicomFileInfoRequest;
+import com.example.vetologyconnector.utils.Utils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;

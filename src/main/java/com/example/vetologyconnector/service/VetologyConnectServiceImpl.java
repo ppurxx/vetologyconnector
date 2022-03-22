@@ -34,10 +34,9 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
     List<CompletableFuture<Void>> futureList = request.getDicomFileList().stream().map(
         dicomFile -> CompletableFuture.runAsync(()->{
           DicomFileInfo currentDicomFile = new DicomFileInfo(request.getDicomFileList().get(i.get()-1));
-          String transferId = getTransferIdAfterSendingFileInfo(caseSlotId, currentDicomFile, numberOfDicomFiles, i.get());
+          String transferId = getTransferIdAfterSendingFileInfo(caseSlotId, currentDicomFile, numberOfDicomFiles, i.getAndIncrement());
 
           sendChunkOfDicomFile(transferId, currentDicomFile.getChunkList());
-          i.set(i.get()+1);
         })
     ).collect(Collectors.toList());
 
@@ -76,10 +75,9 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
     AtomicInteger i = new AtomicInteger(1);
     List<CompletableFuture<Void>> futureList = chunkList.stream().map(
         chunk -> CompletableFuture.runAsync(()->{
-          DicomChunkFileInfoRequest chunkRequest = chunkList.get(i.get()-1).convertToRequest(i.get(),transferId);
+          DicomChunkFileInfoRequest chunkRequest = chunkList.get(i.get()-1).convertToRequest(i.getAndIncrement(),transferId);
           log.info("sendChunkOfDicomFile request 진행 {}",chunkRequest.toJson());
           vetologyApiClient.callUploadChunks(chunkRequest);
-          i.set(i.get()+1);
         })
     ).collect(Collectors.toList());
 

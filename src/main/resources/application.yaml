@@ -23,3 +23,21 @@ vetology:
 #vetology:
 #  url: https://api-staging.vetology.net/service #@@TODO prod환경 url은 확인이 필요함.
 #  license: d66650a4-eece-4651-991c-4e8aa9fce507
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+vetology:
+  url:
+    base: https://api-staging.vetology.net/service/
+    new-case-slot: new-case-slot/
+    contact-information: contact-information/
+    new-file: new-file/
+    upload-chunk: upload-chunk/
+  license: d66650a4-eece-4651-991c-4e8aa9fce507

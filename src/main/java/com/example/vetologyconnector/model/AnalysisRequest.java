@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,12 +37,12 @@ public class AnalysisRequest implements Jsonable{
   String subClinicName;
 
   @NotBlank(message = "병원 email은 필수값입니다.")
-  @Email
+  @Pattern(regexp = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "병원 이메일을 양식이 옳바르지 않습니다.")
   @JsonProperty
   String subClinicEmail;
 
   @NotBlank(message = "환자 email은 필수값입니다.")
-  @Email
+  @Pattern(regexp = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "환자 이메일을 양식이 옳바르지 않습니다.")
   @JsonProperty
   String patientEmail;
 

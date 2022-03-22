@@ -1,14 +1,14 @@
 package com.example.vetologyconnector.controller;
 
+import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.model.AnalysisRequest;
 import com.example.vetologyconnector.model.AnalysisResponse;
-import com.example.vetologyconnector.enums.AnalysisResponseCode;
 import com.example.vetologyconnector.service.VetologyConnectService;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +29,7 @@ public class VetologyConnectController {
       @RequestParam(value="dicomFile3", required = false) MultipartFile dicomFile3,
       @RequestParam(value="dicomFile4", required = false) MultipartFile dicomFile4,
       @RequestParam(value="dicomFile5", required = false) MultipartFile dicomFile5,
-      @Validated AnalysisRequest request, BindingResult bindingResult){
+      @Valid AnalysisRequest request, BindingResult bindingResult){
 
 
     if(bindingResult.hasErrors()){

@@ -7,7 +7,11 @@ import com.example.vetologyconnector.model.DicomChunkFileInfo;
 import com.example.vetologyconnector.model.DicomChunkFileInfoRequest;
 import com.example.vetologyconnector.model.DicomFileInfo;
 import com.example.vetologyconnector.model.DicomFileInfoRequest;
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,17 +29,26 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
     sendContactInfo(new ContactInfo(request), caseSlotId);
     int numberOfDicomFiles = request.getDicomFileList().size();
 
-    for(int i=1;i<=numberOfDicomFiles;i++){
-      DicomFileInfo currentDicomFile = new DicomFileInfo(request.getDicomFileList().get(i-1));
-      String transferId = getTransferIdAfterSendingFileInfo(caseSlotId, currentDicomFile, numberOfDicomFiles, i);
+    AtomicInteger i = new AtomicInteger(1);
 
-      sendChunkOfDicomFile(transferId, currentDicomFile.getChunkList());
-      currentDicomFile.getFile().delete();
-    }
+    List<CompletableFuture<Void>> futureList = request.getDicomFileList().stream().map(
+        dicomFile -> CompletableFuture.runAsync(()->{
+          DicomFileInfo currentDicomFile = new DicomFileInfo(request.getDicomFileList().get(i.get()-1));
+          String transferId = getTransferIdAfterSendingFileInfo(caseSlotId, currentDicomFile, numberOfDicomFiles, i.get());
+
+          sendChunkOfDicomFile(transferId, currentDicomFile.getChunkList());
+          i.set(i.get()+1);
+        })
+    ).collect(Collectors.toList());
+
+    futureList.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+    request.getDicomFileList().forEach(File::delete);
   }
 
   @Override
   public String getCaseSlotId(){
+    log.info("getCaseSlotId request 실행");
     String caseSlotId = vetologyApiClient.callNewCaseSlot();
     log.info("getCaseSlotId request 진행 {}",caseSlotId);
     return caseSlotId;
@@ -60,11 +73,17 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
   @Override
   public void sendChunkOfDicomFile(String transferId, List<DicomChunkFileInfo> chunkList) {
     log.info("sendChunkOfDicomFile 실행 {}, {}",transferId, chunkList);
-    for(int i=1;i<=chunkList.size();i++){
-      DicomChunkFileInfoRequest chunkRequest = chunkList.get(i-1).convertToRequest(i,transferId);
-      log.info("sendChunkOfDicomFile request 진행 {}",chunkRequest.toJson());
-      vetologyApiClient.callUploadChunks(chunkRequest);
-      chunkRequest.getChunk().delete();
-    }
+    AtomicInteger i = new AtomicInteger(1);
+    List<CompletableFuture<Void>> futureList = chunkList.stream().map(
+        chunk -> CompletableFuture.runAsync(()->{
+          DicomChunkFileInfoRequest chunkRequest = chunkList.get(i.get()-1).convertToRequest(i.get(),transferId);
+          log.info("sendChunkOfDicomFile request 진행 {}",chunkRequest.toJson());
+          vetologyApiClient.callUploadChunks(chunkRequest);
+          i.set(i.get()+1);
+        })
+    ).collect(Collectors.toList());
+
+    futureList.stream().map(CompletableFuture::join).collect(Collectors.toList());
+    chunkList.forEach(chunk->chunk.getChunk().delete());
   }
 }

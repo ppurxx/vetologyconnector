@@ -24,7 +24,7 @@ public class VetologyConnectController {
 
   @PostMapping(value = "/send-request")
   public AnalysisResponse sendRequestToVetology(
-      @RequestParam(name="dicomFile1", required = false) MultipartFile dicomFile1,
+      @RequestParam(value="dicomFile1", required = false) MultipartFile dicomFile1,
       @RequestParam(value="dicomFile2", required = false) MultipartFile dicomFile2,
       @RequestParam(value="dicomFile3", required = false) MultipartFile dicomFile3,
       @RequestParam(value="dicomFile4", required = false) MultipartFile dicomFile4,

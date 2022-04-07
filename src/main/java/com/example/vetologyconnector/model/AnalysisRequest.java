@@ -94,7 +94,7 @@ public class AnalysisRequest implements Jsonable{
   }
 
   public BiConsumer<MultipartFile, List<File>> addIfExists = (file, fileList)->{
-    if(file!=null){
+    if(file!= null && !file.isEmpty()){
       fileList.add(Utils.toFileFromMultipartFile(file));
     }
   };

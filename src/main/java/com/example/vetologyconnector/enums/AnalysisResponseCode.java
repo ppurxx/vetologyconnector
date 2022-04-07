@@ -3,7 +3,7 @@ package com.example.vetologyconnector.enums;
 import org.springframework.http.HttpStatus;
 
 public enum AnalysisResponseCode {
-  OK("분석에 성공했습니다. email을 확인해주세요",HttpStatus.OK),
+  OK("분석에 성공했습니다.\n분석에는 최대 10분까지 소요됩니다. \nemail을 확인해주세요",HttpStatus.OK),
   INVALID_REQUEST("잘못된 요청입니다.",HttpStatus.BAD_REQUEST),
   INTERNAL_ERROR("API 호출 도중 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
   EMPTY_FILES("파일이 입력되지 않았습니다.",HttpStatus.BAD_REQUEST),

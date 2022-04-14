@@ -7,16 +7,11 @@ import com.example.vetologyconnector.model.ContactInfoRequest;
 import com.example.vetologyconnector.model.DicomChunkFileInfoRequest;
 import com.example.vetologyconnector.model.DicomFileInfoRequest;
 import com.example.vetologyconnector.model.Jsonable;
-import com.example.vetologyconnector.utils.Utils;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.ExecutionException;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
@@ -153,12 +148,13 @@ public class VetologyApiClientImpl implements VetologyApiClient {
     }
 
     @Override
-    public void callUploadChunks(DicomChunkFileInfoRequest dicomChunkFileInfoRequest) {
+    public void callUploadChunks(DicomChunkFileInfoRequest dicomChunkFileInfoRequest){
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(CHUNK, dicomChunkFileInfoRequest.getChunk().getName(),
-                        RequestBody.create(MediaType.parse(APPLICATION_OCTET_STREAM), dicomChunkFileInfoRequest.getChunk()))
-                .addFormDataPart(CHUNK_NUMBER, dicomChunkFileInfoRequest.getChunk_number() + "")
+                        RequestBody.create(MediaType.parse(APPLICATION_OCTET_STREAM),
+                                new File(dicomChunkFileInfoRequest.getChunk().getAbsolutePath())))
+                .addFormDataPart(CHUNK_NUMBER, String.valueOf(dicomChunkFileInfoRequest.getChunk_number()))
                 .addFormDataPart(TRANSFER_ID, dicomChunkFileInfoRequest.getTransfer_id())
                 .build();
 
@@ -181,6 +177,7 @@ public class VetologyApiClientImpl implements VetologyApiClient {
             e.printStackTrace();
             throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
         }
+
     }
 
     private void logRequest(Request request, Jsonable jsonable) {
@@ -195,6 +192,7 @@ public class VetologyApiClientImpl implements VetologyApiClient {
         log.info("\n[RESPONSE] \n-status : {} \n-header : {} \n-body : {}", response.code(), response.headers(), responseBody);
     }
 
+    //with only stage environment
     private static OkHttpClient getUnsafeOkHttpClient() {
         try {
             // Create a trust manager that does not validate certificate chains

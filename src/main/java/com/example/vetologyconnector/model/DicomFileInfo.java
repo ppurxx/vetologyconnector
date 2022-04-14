@@ -36,16 +36,16 @@ public class DicomFileInfo  implements Jsonable{
 
       try {
         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-        String name = file.getName();
+        String name = file.getName().replaceAll("\\.","");
 
         int tmp = 0;
         while ((tmp = bis.read(buffer)) > 0) {
-          File newFile = new File(file.getParent(), String.format("%03d", counter++) + name);
-          DicomChunkFileInfo newChunkFile = new DicomChunkFileInfo(newFile);
+          File newFile = new File(file.getParent(), name + "_chunk_"+counter+".gz");
           try (GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(newFile))) {
             out.write(buffer, 0, tmp);
           }
-
+          DicomChunkFileInfo newChunkFile = new DicomChunkFileInfo(newFile.getAbsoluteFile());
+          counter++;
           files.add(newChunkFile);
         }
       }catch (Exception e){

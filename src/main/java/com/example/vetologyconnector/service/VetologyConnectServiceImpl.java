@@ -66,7 +66,7 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
     AtomicInteger i = new AtomicInteger(1);
     List<CompletableFuture<Void>> futureList = chunkList.stream().map(
         chunk -> CompletableFuture.runAsync(()->{
-          DicomChunkFileInfoRequest chunkRequest = chunkList.get(i.get()-1).convertToRequest(i.getAndIncrement(),transferId);
+          DicomChunkFileInfoRequest chunkRequest = chunk.convertToRequest(i.getAndIncrement(),transferId);
           vetologyApiClient.callUploadChunks(chunkRequest);
         })
     ).collect(Collectors.toList());

@@ -31,7 +31,7 @@ public class VetologyConnectServiceImpl implements VetologyConnectService{
 
     List<CompletableFuture<Void>> futureList = request.getDicomFileList().stream().map(
         dicomFile -> CompletableFuture.runAsync(()->{
-          DicomFileInfo currentDicomFile = new DicomFileInfo(request.getDicomFileList().get(i.get()-1));
+          DicomFileInfo currentDicomFile = new DicomFileInfo(dicomFile);
           String transferId = getTransferIdAfterSendingFileInfo(caseSlotId, currentDicomFile, numberOfDicomFiles, i.getAndIncrement());
 
           sendChunkOfDicomFile(transferId, currentDicomFile.getChunkList());

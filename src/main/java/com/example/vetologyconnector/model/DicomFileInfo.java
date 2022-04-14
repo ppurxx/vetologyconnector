@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.DigestUtils;
@@ -40,7 +42,7 @@ public class DicomFileInfo  implements Jsonable{
         while ((tmp = bis.read(buffer)) > 0) {
           File newFile = new File(file.getParent(), String.format("%03d", counter++) + name);
           DicomChunkFileInfo newChunkFile = new DicomChunkFileInfo(newFile);
-          try (FileOutputStream out = new FileOutputStream(newFile)) {
+          try (GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(newFile))) {
             out.write(buffer, 0, tmp);
           }
 
@@ -53,16 +55,16 @@ public class DicomFileInfo  implements Jsonable{
       return files;
   }
 
-  public int getFileChecksum(){
-    byte[] res = null;
+  public String getFileChecksum(){
+    String res = null;
     try {
       InputStream is = new FileInputStream(this.getFile());
-      res = DigestUtils.md5Digest(is);
+      res = DigestUtils.md5DigestAsHex(is);
     } catch (IOException e) {
       e.printStackTrace();
       throw new VetologyConnectException(AnalysisResponseCode.INTERNAL_ERROR);
     }
-    return ByteBuffer.wrap(res).getInt();
+    return res;
   }
 
   public int getNumberOfChunks(){

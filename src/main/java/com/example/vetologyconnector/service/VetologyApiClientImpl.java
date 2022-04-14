@@ -14,6 +14,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.ExecutionException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.*;
+
 @Service
 @Slf4j
 public class VetologyApiClientImpl implements VetologyApiClient {
@@ -45,7 +49,8 @@ public class VetologyApiClientImpl implements VetologyApiClient {
     public static final String CHUNK_NUMBER = "chunk_number";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 
-    private final static OkHttpClient client = new OkHttpClient().newBuilder().build();
+//    private final static OkHttpClient client = new OkHttpClient().newBuilder().build();
+    private final static OkHttpClient client = getUnsafeOkHttpClient();
     public static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8";
 
     @Value("${vetology.url.base}")
@@ -188,6 +193,48 @@ public class VetologyApiClientImpl implements VetologyApiClient {
 
     private void logResponse(Response response, String responseBody) throws IOException {
         log.info("\n[RESPONSE] \n-status : {} \n-header : {} \n-body : {}", response.code(), response.headers(), responseBody);
+    }
+
+    private static OkHttpClient getUnsafeOkHttpClient() {
+        try {
+            // Create a trust manager that does not validate certificate chains
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
+                                                       String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
+                                                       String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }
+            };
+
+            // Install the all-trusting trust manager
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            // Create an ssl socket factory with our all-trusting manager
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            return new OkHttpClient.Builder()
+                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
+                    .hostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    }).build();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

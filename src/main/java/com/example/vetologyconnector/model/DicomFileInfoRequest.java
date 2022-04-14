@@ -23,7 +23,7 @@ public class DicomFileInfoRequest  implements Jsonable{
   @JsonProperty
   int total_chunks;
   @JsonProperty
-  int file_checksum;
+  String file_checksum;
   @JsonProperty
   String file_name;
 }

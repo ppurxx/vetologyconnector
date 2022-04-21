@@ -1,18 +1,14 @@
 package com.example.vetologyconnector.service;
 
 
-import com.example.vetologyconnector.exception.VetologyConnectException;
+import com.example.vetologyconnector.exception.VetologyConnectorException;
 import com.example.vetologyconnector.enums.AnalysisResponseCode;
-import com.example.vetologyconnector.model.ContactInfoRequest;
-import com.example.vetologyconnector.model.DicomChunkFileInfoRequest;
-import com.example.vetologyconnector.model.DicomFileInfoRequest;
-import com.example.vetologyconnector.model.Jsonable;
+import com.example.vetologyconnector.model.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -27,10 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.*;
-
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class VetologyApiClientImpl implements VetologyApiClient {
     public static final String POST = "POST";
     public static final String AUTHORIZATION = "Authorization";
@@ -43,9 +38,7 @@ public class VetologyApiClientImpl implements VetologyApiClient {
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String CHUNK_NUMBER = "chunk_number";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
-
-//    private final static OkHttpClient client = new OkHttpClient().newBuilder().build();
-    private final static OkHttpClient client = getUnsafeOkHttpClient();
+    private final OkHttpClient client;
     public static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8";
 
     @Value("${vetology.url.base}")
@@ -87,46 +80,46 @@ public class VetologyApiClientImpl implements VetologyApiClient {
 
         } catch (IOException | ParseException e) {
             e.printStackTrace();
-            throw new VetologyConnectException(AnalysisResponseCode.INTERNAL_ERROR);
+            throw new VetologyConnectorException(AnalysisResponseCode.INTERNAL_ERROR);
         }
 
         return result;
     }
 
     @Override
-    public void callContactInformation(ContactInfoRequest contactInfoRequest) {
+    public void callContactInformation(ContactInfo contactInfo) {
         Request request = new Request.Builder()
                 .url(baseUrl + contactInformationUrl)
-                .method(POST, RequestBody.create(MediaType.get(APPLICATION_JSON_CHARSET_UTF_8), contactInfoRequest.toJson()))
+                .method(POST, RequestBody.create(MediaType.get(APPLICATION_JSON_CHARSET_UTF_8), contactInfo.toJson()))
                 .addHeader(AUTHORIZATION, BEARER + license)
                 .addHeader(CONTENT_TYPE, APPLICATION_JSON)
                 .build();
 
-        logRequest(request, contactInfoRequest);
+        logRequest(request, contactInfo);
         try {
             Response response = client.newCall(request).execute();
             logResponse(response, response.body().string());
 
             if (response.code() != HttpStatus.OK.value()) {
-                throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+                throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+            throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
         }
 
     }
 
     @Override
-    public String callNewFile(DicomFileInfoRequest dicomFileInfoRequest) {
+    public String callNewFile(FileInfo fileInfo) {
         Request request = new Request.Builder()
                 .url(baseUrl + newFileUrl)
-                .method(POST, RequestBody.create(MediaType.get(APPLICATION_JSON_CHARSET_UTF_8), dicomFileInfoRequest.toJson()))
+                .method(POST, RequestBody.create(MediaType.get(APPLICATION_JSON_CHARSET_UTF_8), fileInfo.toJson()))
                 .addHeader(AUTHORIZATION, BEARER + license)
                 .addHeader(CONTENT_TYPE, APPLICATION_JSON)
                 .build();
 
-        logRequest(request, dicomFileInfoRequest);
+        logRequest(request, fileInfo);
 
         String result = "";
         try {
@@ -135,27 +128,27 @@ public class VetologyApiClientImpl implements VetologyApiClient {
             logResponse(response, responseBody);
 
             if (response.code() != HttpStatus.OK.value()) {
-                throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+                throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
             }
             JSONParser parser = new JSONParser();
             JSONObject obj = (JSONObject) parser.parse(responseBody);
             result = obj.get(TRANSFER_ID).toString();
         } catch (IOException | ParseException e) {
             e.printStackTrace();
-            throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+            throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
         }
         return result;
     }
 
     @Override
-    public void callUploadChunks(DicomChunkFileInfoRequest dicomChunkFileInfoRequest){
+    public void callUploadChunks(ChunkFileInfo chunkFileInfo){
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart(CHUNK, dicomChunkFileInfoRequest.getChunk().getName(),
+                .addFormDataPart(CHUNK, chunkFileInfo.getChunk().getName(),
                         RequestBody.create(MediaType.parse(APPLICATION_OCTET_STREAM),
-                                new File(dicomChunkFileInfoRequest.getChunk().getAbsolutePath())))
-                .addFormDataPart(CHUNK_NUMBER, String.valueOf(dicomChunkFileInfoRequest.getChunk_number()))
-                .addFormDataPart(TRANSFER_ID, dicomChunkFileInfoRequest.getTransfer_id())
+                                new File(chunkFileInfo.getChunk().getAbsolutePath())))
+                .addFormDataPart(CHUNK_NUMBER, String.valueOf(chunkFileInfo.getChunkNumber()))
+                .addFormDataPart(TRANSFER_ID, chunkFileInfo.getTransferId())
                 .build();
 
         Request request = new Request.Builder()
@@ -164,18 +157,18 @@ public class VetologyApiClientImpl implements VetologyApiClient {
                 .addHeader(AUTHORIZATION, BEARER + license)
                 .addHeader(CONTENT_TYPE, MULTIPART_FORM_DATA)
                 .build();
-        logRequest(request, dicomChunkFileInfoRequest);
+        logRequest(request, chunkFileInfo);
 
         try {
             Response response = client.newCall(request).execute();
             logResponse(response, response.body().string());
 
             if (response.code() != HttpStatus.OK.value()) {
-                throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+                throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            throw new VetologyConnectException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
+            throw new VetologyConnectorException(AnalysisResponseCode.FILE_TRANSFER_FAILED);
         }
 
     }
@@ -192,47 +185,6 @@ public class VetologyApiClientImpl implements VetologyApiClient {
         log.info("\n[RESPONSE] \n-status : {} \n-header : {} \n-body : {}", response.code(), response.headers(), responseBody);
     }
 
-    //with only stage environment
-    private static OkHttpClient getUnsafeOkHttpClient() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            final TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                                                       String authType) throws CertificateException {
-                        }
 
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                                                       String authType) throws CertificateException {
-                        }
-
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                    }
-            };
-
-            // Install the all-trusting trust manager
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            // Create an ssl socket factory with our all-trusting manager
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            return new OkHttpClient.Builder()
-                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
-                    .hostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            return true;
-                        }
-                    }).build();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }

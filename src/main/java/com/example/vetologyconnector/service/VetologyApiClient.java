@@ -1,13 +1,13 @@
 package com.example.vetologyconnector.service;
 
-import com.example.vetologyconnector.model.ContactInfoRequest;
-import com.example.vetologyconnector.model.DicomChunkFileInfoRequest;
-import com.example.vetologyconnector.model.DicomFileInfoRequest;
+import com.example.vetologyconnector.model.ChunkFileInfo;
+import com.example.vetologyconnector.model.ContactInfo;
+import com.example.vetologyconnector.model.FileInfo;
 
 public interface VetologyApiClient {
 
   String callNewCaseSlot();
-  void callContactInformation(ContactInfoRequest contactInfoRequest);
-  String callNewFile(DicomFileInfoRequest dicomFileInfoRequest);
-  void callUploadChunks(DicomChunkFileInfoRequest dicomChunkFileInfoRequest);
+  void callContactInformation(ContactInfo contactInfo);
+  String callNewFile(FileInfo fileInfo);
+  void callUploadChunks(ChunkFileInfo chunkFileInfo);
 }

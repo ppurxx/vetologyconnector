@@ -7,8 +7,10 @@ import com.example.vetologyconnector.service.VetologyConnectService;
 
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +21,7 @@ public class VetologyConnectController {
   private final VetologyConnectService vetologyConnectService;
 
 
-  @PostMapping(value = "/send-request")
+  @PostMapping(value = "/send-request" , consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   public AnalysisResponse sendRequestToVetology(
           @Valid AnalysisRequest request,
           BindingResult bindingResult){

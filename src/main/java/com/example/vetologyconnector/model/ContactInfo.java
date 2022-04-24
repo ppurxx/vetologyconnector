@@ -22,9 +22,9 @@ public class ContactInfo  implements Jsonable{
   String caseSlotId;
 
   public ContactInfo(AnalysisRequest request, String caseSlotId){
-    this.subclinicId = request.getSubClinicId();
-    this.subclinicEmail = request.getSubClinicEmail();
-    this.subclinicName = request.getSubClinicName();
+    this.subclinicId = request.getSubclinicId();
+    this.subclinicEmail = request.getSubclinicEmail();
+    this.subclinicName = request.getSubclinicName();
     this.patientFirstname = request.getPatientFirstName();
     this.patientLastname = request.getPatientLastName();
     this.caseSlotId = caseSlotId;

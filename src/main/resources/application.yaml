@@ -13,7 +13,7 @@ vetology:
     contact-information: contact-information/
     new-file: new-file/
     upload-chunk: upload-chunk/
-  license: f85266a0-3a4e-4ae6-aa30-dff8038f9170
+  license: 9f0234ff-c3a2-4950-beab-84b66c3d8553
 #
 #---
 #spring:
@@ -35,9 +35,9 @@ spring:
       max-request-size: 25MB
 vetology:
   url:
-    base: https://api-staging.vetology.net/service/
+    base: https://api.vetology.net/service/
     new-case-slot: new-case-slot/
     contact-information: contact-information/
     new-file: new-file/
     upload-chunk: upload-chunk/
-  license: d66650a4-eece-4651-991c-4e8aa9fce507
+  license: d4f48959-a83b-4eb7-937c-8141bfeaed0c

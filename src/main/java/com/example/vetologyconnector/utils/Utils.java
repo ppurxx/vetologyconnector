@@ -43,7 +43,7 @@ public class Utils {
   }
 
   private static String generateUniqueFileName(String original){
-    String converted = original.length()>20?UUID.randomUUID()+getFileExpansion(original):UUID.randomUUID()+original;
+    String converted = UUID.randomUUID()+getFileExpansion(original);
     log.info("file {} is renamed to {}",original,converted);
 
     return converted;
